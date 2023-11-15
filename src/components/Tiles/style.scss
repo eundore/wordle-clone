@@ -1,0 +1,19 @@
+main-tiles {
+  display: grid;
+  height: 371px;
+  width: 300px;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+  margin: 30px auto;
+
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000000;
+    font-size: 36px;
+    font-family: "Kanit", sans-serif;
+    color: #ffffff;
+  }
+}

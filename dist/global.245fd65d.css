@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Kanit&family=Noto+Sans+KR&display=swap");
+main-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Kanit", sans-serif;
+  font-size: 32px;
+  padding: 32px 16px;
+}
+
+main-tiles {
+  display: grid;
+  height: 371px;
+  width: 300px;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+  margin: 30px auto;
+}
+main-tiles .tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  font-size: 36px;
+  font-family: "Kanit", sans-serif;
+  color: #ffffff;
+}
+
+main-keyboard {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  max-width: 484px;
+  margin: auto;
+}
+main-keyboard .row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+main-keyboard .row .key {
+  font-family: "Kanit", sans-serif;
+  font-size: 1.25em;
+  border: 0;
+  width: 40px;
+  height: 58px;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  background-color: #818384;
+  color: #ffffff;
+}
+main-keyboard .row .key svg {
+  color: #ffffff;
+}
+main-keyboard .row .unique {
+  width: 60px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/*# sourceMappingURL=/global.245fd65d.css.map */
