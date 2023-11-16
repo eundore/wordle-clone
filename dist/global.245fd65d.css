@@ -35,10 +35,10 @@ main-tiles .row [data-state=absent] {
   background-color: #3a3a3c;
 }
 main-tiles .row [data-state=present] {
-  background-color: #b59f3b;
+  background-color: #ebe563;
 }
 main-tiles .row [data-state=correct] {
-  background-color: #538d4e;
+  background-color: #43c7f4;
 }
 
 main-keyboard {
@@ -80,10 +80,27 @@ main-keyboard .row [data-state=absent] {
   background-color: #3a3a3c;
 }
 main-keyboard .row [data-state=present] {
-  background-color: #b59f3b;
+  background-color: #ebe563;
 }
 main-keyboard .row [data-state=correct] {
-  background-color: #538d4e;
+  background-color: #43c7f4;
+}
+
+#toast {
+  position: fixed;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#toast div {
+  font-family: "Kanit", sans-serif;
+  color: #f8f8f8;
+  background-color: #ff3399;
+  padding: 15px;
+  border-radius: 5px;
 }
 
 /*# sourceMappingURL=/global.245fd65d.css.map */

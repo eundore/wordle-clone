@@ -302,11 +302,8 @@ var Tiles = /*#__PURE__*/function (_HTMLElement) {
     key: "render",
     value: function render() {
       var _store$getState = _store.default.getState("storage"),
-        word = _store$getState.word,
         key = _store$getState.key,
-        index = _store$getState.index,
-        answer = _store$getState.answer;
-      console.log(key, word, index, answer);
+        index = _store$getState.index;
       var row = document.getElementById("row-".concat(index));
       if (!row) {
         return;
@@ -335,7 +332,24 @@ var Tiles = /*#__PURE__*/function (_HTMLElement) {
 function defineTiles() {
   customElements.define("main-tiles", Tiles);
 }
-},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js"}],"src/components/Keyboard/index.js":[function(require,module,exports) {
+},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js"}],"src/utils/toast.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createToast;
+function createToast(message) {
+  var timer = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1500;
+  var toast = document.getElementById("toast");
+  var messageContainer = document.createElement("div");
+  messageContainer.textContent = message;
+  toast.appendChild(messageContainer);
+  setTimeout(function () {
+    toast.removeChild(messageContainer);
+  }, 1500);
+}
+},{}],"src/components/Keyboard/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -344,6 +358,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = defineKeyboard;
 var _store = _interopRequireDefault(require("../../store"));
 var _constants = require("../../constants");
+var _toast = _interopRequireDefault(require("../../utils/toast"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
@@ -377,18 +392,25 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
     _this = _super.call(this);
     _this.init();
     _this.render();
-    _this.addEventListener();
-    _store.default.subscribe("storage", function () {
-      _this.updateState();
-    });
+    _this.addClickEventListener();
+    _this.addKeyEventListener();
     return _this;
   }
   _createClass(Keyboard, [{
     key: "init",
     value: function init() {
+      var _this2 = this;
       this.word = "";
       this.index = 0;
       this.answer = "";
+      this.isEnd = false;
+      this.isLast = false;
+      this.isNotEnough = true;
+      this.isNotWord = true;
+      this.isCorrect = false;
+      _store.default.subscribe("storage", function () {
+        _this2.updateState();
+      });
     }
   }, {
     key: "render",
@@ -425,11 +447,15 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       this.word = word;
       this.index = index;
       this.answer = answer;
+      this.isEnd = index >= _constants.ROW_LENGTH;
+      this.isLast = index === _constants.ROW_LENGTH - 1;
+      this.isNotEnough = word.length < _constants.COLUMN_LENGTH;
+      this.isNotWord = !_constants.WORDS.includes(word);
     }
   }, {
-    key: "addEventListener",
-    value: function addEventListener() {
-      var _this2 = this;
+    key: "addClickEventListener",
+    value: function addClickEventListener() {
+      var _this3 = this;
       var keys = this.querySelectorAll(".key:not(.oneAndHalf)");
       var enter = this.querySelector("[aria-label='enter']");
       var backspace = this.querySelector("[aria-label='backspace']");
@@ -439,15 +465,7 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
         var _loop = function _loop() {
           var key = _step2.value;
           key.addEventListener("click", function () {
-            if (_this2.index >= _constants.ROW_LENGTH) {
-              return;
-            }
-            if (_this2.word.length < _constants.COLUMN_LENGTH) {
-              _store.default.setState("storage", {
-                key: key.dataset.key,
-                word: _this2.word + key.dataset.key
-              });
-            }
+            return _this3.keyEvent(key.dataset.key);
           });
         };
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
@@ -458,65 +476,121 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       } finally {
         _iterator2.f();
       }
-      enter.addEventListener("click", function () {
-        if (_this2.index >= _constants.ROW_LENGTH) {
-          return;
-        }
-        if (_this2.word.length < _constants.COLUMN_LENGTH) {
-          console.log("not yet!");
-          return;
-        }
-        if (!_constants.WORDS.includes(_this2.word)) {
-          console.log("not in word list!");
-          return;
-        }
-        var word = _toConsumableArray(_this2.word);
-        var answer = _toConsumableArray(_this2.answer);
-        var result = [];
-        for (var i = 0; i < _constants.COLUMN_LENGTH; i++) {
-          if (word[i] === answer[i]) {
-            result.push("correct");
-          } else if (answer.includes(word[i])) {
-            result.push("present");
-          } else {
-            result.push("absent");
-          }
-        }
-        var row = document.getElementById("row-".concat(_this2.index));
-        var tiles = row.querySelectorAll("[data-state='tbd']");
-        tiles.forEach(function (tile, index) {
-          tile.setAttribute("data-state", result[index]);
-          var key = document.querySelector("button[data-key='".concat(word[index], "']"));
-          var key_state = key.getAttribute("data-state");
-          switch (key_state) {
-            case "present":
-              if (result[index] === "correct") {
-                key.setAttribute("data-state", result[index]);
-              }
-            case "correct":
-              break;
-            default:
-              key.setAttribute("data-state", result[index]);
-              break;
-          }
-        });
-        _store.default.setState("storage", {
-          index: _this2.index + 1,
-          word: "",
-          key: null
-        });
+      enter.addEventListener("click", function (e) {
+        return _this3.enterkeyEvent();
       });
       backspace.addEventListener("click", function () {
-        if (_this2.index >= _constants.ROW_LENGTH) {
-          return;
+        return _this3.backspaceKeyEvent();
+      });
+    }
+  }, {
+    key: "addKeyEventListener",
+    value: function addKeyEventListener() {
+      var _this4 = this;
+      document.addEventListener("keydown", function (e) {
+        if (e.key.match(/^[a-zA-Z]$/)) {
+          var key = e.key.toLowerCase();
+          _this4.keyEvent(key);
         }
-        if (_this2.word) {
-          _store.default.setState("storage", {
-            key: null,
-            word: _this2.word.slice(0, -1)
-          });
+        if (e.key === "Enter") {
+          _this4.enterkeyEvent();
+        }
+        if (e.key === "Backspace") {
+          _this4.backspaceKeyEvent();
         }
       });
+    }
+  }, {
+    key: "keyEvent",
+    value: function keyEvent(key) {
+      var isEnd = this.isEnd,
+        isCorrect = this.isCorrect;
+      if (isEnd || isCorrect) {
+        return;
+      }
+      if (this.word.length < _constants.COLUMN_LENGTH) {
+        _store.default.setState("storage", {
+          key: key,
+          word: this.word + key
+        });
+      }
+    }
+  }, {
+    key: "enterkeyEvent",
+    value: function enterkeyEvent() {
+      var isEnd = this.isEnd,
+        isLast = this.isLast,
+        isNotEnough = this.isNotEnough,
+        isNotWord = this.isNotWord,
+        isCorrect = this.isCorrect;
+      if (isEnd || isCorrect) {
+        return;
+      }
+      if (isNotEnough) {
+        (0, _toast.default)("Not enough letter!");
+        return;
+      }
+      if (isNotWord) {
+        (0, _toast.default)("Not in word list!");
+        return;
+      }
+      var word = _toConsumableArray(this.word);
+      var answer = _toConsumableArray(this.answer);
+      var result = [];
+      for (var i = 0; i < _constants.COLUMN_LENGTH; i++) {
+        if (word[i] === answer[i]) {
+          result.push("correct");
+        } else if (answer.includes(word[i])) {
+          result.push("present");
+        } else {
+          result.push("absent");
+        }
+      }
+      var row = document.getElementById("row-".concat(this.index));
+      var tiles = row.querySelectorAll("[data-state='tbd']");
+      tiles.forEach(function (tile, index) {
+        tile.setAttribute("data-state", result[index]);
+        var key = document.querySelector("button[data-key='".concat(word[index], "']"));
+        var key_state = key.getAttribute("data-state");
+        switch (key_state) {
+          case "present":
+            if (result[index] === "correct") {
+              key.setAttribute("data-state", result[index]);
+            }
+          case "correct":
+            break;
+          default:
+            key.setAttribute("data-state", result[index]);
+            break;
+        }
+      });
+      if (this.word === this.answer) {
+        (0, _toast.default)("Congratulations!");
+        this.isCorrect = true;
+      } else if (isLast) {
+        (0, _toast.default)(this.answer, 5000);
+      }
+      _store.default.setState("storage", {
+        index: this.index + 1,
+        word: "",
+        key: null
+      });
+    }
+  }, {
+    key: "backspaceKeyEvent",
+    value: function backspaceKeyEvent() {
+      var isEnd = this.isEnd,
+        isCorrect = this.isCorrect,
+        word = this.word;
+      if (isEnd || isCorrect) {
+        return;
+      }
+      if (word) {
+        _store.default.setState("storage", {
+          key: null,
+          word: this.word.slice(0, -1)
+        });
+      }
     }
   }]);
   return Keyboard;
@@ -524,7 +598,7 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
 function defineKeyboard() {
   customElements.define("main-keyboard", Keyboard);
 }
-},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js"}],"src/pages/main/index.js":[function(require,module,exports) {
+},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js","../../utils/toast":"src/utils/toast.js"}],"src/pages/main/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -582,7 +656,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61609" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54063" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

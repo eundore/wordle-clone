@@ -1,0 +1,17 @@
+#toast {
+  position: fixed;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  div {
+    font-family: "Kanit", sans-serif;
+    color: #f8f8f8;
+    background-color: #ff3399;
+    padding: 15px;
+    border-radius: 5px;
+  }
+}

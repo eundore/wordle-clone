@@ -27,9 +27,7 @@ class Tiles extends HTMLElement {
   }
 
   render() {
-    const { word, key, index, answer } = store.getState("storage");
-
-    console.log(key, word, index, answer);
+    const { key, index } = store.getState("storage");
 
     const row = document.getElementById(`row-${index}`);
 

@@ -1,5 +1,6 @@
 import store from "../../store";
 import { KEYS, COLUMN_LENGTH, ROW_LENGTH, WORDS } from "../../constants";
+import createToast from "../../utils/toast";
 
 class Keyboard extends HTMLElement {
   constructor() {
@@ -7,17 +8,24 @@ class Keyboard extends HTMLElement {
 
     this.init();
     this.render();
-    this.addEventListener();
-
-    store.subscribe("storage", () => {
-      this.updateState();
-    });
+    this.addClickEventListener();
+    this.addKeyEventListener();
   }
 
   init() {
     this.word = "";
     this.index = 0;
     this.answer = "";
+
+    this.isEnd = false;
+    this.isLast = false;
+    this.isNotEnough = true;
+    this.isNotWord = true;
+    this.isCorrect = false;
+
+    store.subscribe("storage", () => {
+      this.updateState();
+    });
   }
 
   render() {
@@ -44,99 +52,139 @@ class Keyboard extends HTMLElement {
     this.word = word;
     this.index = index;
     this.answer = answer;
+
+    this.isEnd = index >= ROW_LENGTH;
+    this.isLast = index === ROW_LENGTH - 1;
+    this.isNotEnough = word.length < COLUMN_LENGTH;
+    this.isNotWord = !WORDS.includes(word);
   }
 
-  addEventListener() {
+  addClickEventListener() {
     const keys = this.querySelectorAll(".key:not(.oneAndHalf)");
     const enter = this.querySelector("[aria-label='enter']");
     const backspace = this.querySelector("[aria-label='backspace']");
 
     for (let key of keys) {
-      key.addEventListener("click", () => {
-        if (this.index >= ROW_LENGTH) {
-          return;
-        }
+      key.addEventListener("click", () => this.keyEvent(key.dataset.key));
+    }
+    enter.addEventListener("click", (e) => this.enterkeyEvent());
 
-        if (this.word.length < COLUMN_LENGTH) {
-          store.setState("storage", {
-            key: key.dataset.key,
-            word: this.word + key.dataset.key,
-          });
-        }
-      });
+    backspace.addEventListener("click", () => this.backspaceKeyEvent());
+  }
+
+  addKeyEventListener() {
+    document.addEventListener("keydown", (e) => {
+      if (e.key.match(/^[a-zA-Z]$/)) {
+        const key = e.key.toLowerCase();
+        this.keyEvent(key);
+      }
+
+      if (e.key === "Enter") {
+        this.enterkeyEvent();
+      }
+
+      if (e.key === "Backspace") {
+        this.backspaceKeyEvent();
+      }
+    });
+  }
+
+  keyEvent(key) {
+    const { isEnd, isCorrect } = this;
+
+    if (isEnd || isCorrect) {
+      return;
     }
 
-    enter.addEventListener("click", () => {
-      if (this.index >= ROW_LENGTH) {
-        return;
-      }
-
-      if (this.word.length < COLUMN_LENGTH) {
-        console.log("not yet!");
-        return;
-      }
-
-      if (!WORDS.includes(this.word)) {
-        console.log("not in word list!");
-        return;
-      }
-
-      const word = [...this.word];
-      const answer = [...this.answer];
-      const result = [];
-
-      for (let i = 0; i < COLUMN_LENGTH; i++) {
-        if (word[i] === answer[i]) {
-          result.push("correct");
-        } else if (answer.includes(word[i])) {
-          result.push("present");
-        } else {
-          result.push("absent");
-        }
-      }
-
-      const row = document.getElementById(`row-${this.index}`);
-
-      const tiles = row.querySelectorAll("[data-state='tbd']");
-
-      tiles.forEach((tile, index) => {
-        tile.setAttribute("data-state", result[index]);
-
-        const key = document.querySelector(`button[data-key='${word[index]}']`);
-        const key_state = key.getAttribute("data-state");
-
-        switch (key_state) {
-          case "present":
-            if (result[index] === "correct") {
-              key.setAttribute("data-state", result[index]);
-            }
-          case "correct":
-            break;
-          default:
-            key.setAttribute("data-state", result[index]);
-            break;
-        }
-      });
-
+    if (this.word.length < COLUMN_LENGTH) {
       store.setState("storage", {
-        index: this.index + 1,
-        word: "",
-        key: null,
+        key,
+        word: this.word + key,
       });
+    }
+  }
+
+  enterkeyEvent() {
+    const { isEnd, isLast, isNotEnough, isNotWord, isCorrect } = this;
+
+    if (isEnd || isCorrect) {
+      return;
+    }
+
+    if (isNotEnough) {
+      createToast("Not enough letter!");
+      return;
+    }
+
+    if (isNotWord) {
+      createToast("Not in word list!");
+      return;
+    }
+
+    const word = [...this.word];
+    const answer = [...this.answer];
+    const result = [];
+
+    for (let i = 0; i < COLUMN_LENGTH; i++) {
+      if (word[i] === answer[i]) {
+        result.push("correct");
+      } else if (answer.includes(word[i])) {
+        result.push("present");
+      } else {
+        result.push("absent");
+      }
+    }
+
+    const row = document.getElementById(`row-${this.index}`);
+
+    const tiles = row.querySelectorAll("[data-state='tbd']");
+
+    tiles.forEach((tile, index) => {
+      tile.setAttribute("data-state", result[index]);
+
+      const key = document.querySelector(`button[data-key='${word[index]}']`);
+      const key_state = key.getAttribute("data-state");
+
+      switch (key_state) {
+        case "present":
+          if (result[index] === "correct") {
+            key.setAttribute("data-state", result[index]);
+          }
+        case "correct":
+          break;
+        default:
+          key.setAttribute("data-state", result[index]);
+          break;
+      }
     });
 
-    backspace.addEventListener("click", () => {
-      if (this.index >= ROW_LENGTH) {
-        return;
-      }
+    if (this.word === this.answer) {
+      createToast("Congratulations!");
+      this.isCorrect = true;
+    } else if (isLast) {
+      createToast(this.answer, 5000);
+    }
 
-      if (this.word) {
-        store.setState("storage", {
-          key: null,
-          word: this.word.slice(0, -1),
-        });
-      }
+    store.setState("storage", {
+      index: this.index + 1,
+      word: "",
+      key: null,
     });
+  }
+
+  backspaceKeyEvent() {
+    const { isEnd, isCorrect, word } = this;
+
+    if (isEnd || isCorrect) {
+      return;
+    }
+
+    if (word) {
+      store.setState("storage", {
+        key: null,
+        word: this.word.slice(0, -1),
+      });
+    }
   }
 }
 
