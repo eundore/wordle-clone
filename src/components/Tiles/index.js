@@ -2,10 +2,12 @@ class Tiles extends HTMLElement {
   constructor() {
     super();
 
+    this.init();
+  }
+
+  init() {
     for (let i = 0; i < 30; i++) {
-      this.innerHTML += `<div class='tile'>${String.fromCharCode(
-        i + 65
-      )}</div>`;
+      this.innerHTML += `<div class='tile'></div>`;
     }
   }
 }

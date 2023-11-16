@@ -42,6 +42,7 @@ main-keyboard .row {
 main-keyboard .row .key {
   font-family: "Kanit", sans-serif;
   font-size: 1.25em;
+  text-transform: uppercase;
   border: 0;
   width: 40px;
   height: 58px;
@@ -53,13 +54,13 @@ main-keyboard .row .key {
   background-color: #818384;
   color: #ffffff;
 }
-main-keyboard .row .key svg {
-  color: #ffffff;
-}
-main-keyboard .row .unique {
+main-keyboard .row .oneAndHalf {
   width: 60px;
   font-size: 12px;
   font-weight: 600;
+}
+main-keyboard .row .oneAndHalf svg {
+  color: #ffffff;
 }
 
 /*# sourceMappingURL=/global.245fd65d.css.map */

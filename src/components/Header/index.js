@@ -6,6 +6,6 @@ class Header extends HTMLElement {
   }
 }
 
-export default function defineMainHeader() {
+export default function definHeader() {
   customElements.define("main-header", Header);
 }

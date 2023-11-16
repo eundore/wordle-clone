@@ -13,9 +13,8 @@ main-keyboard {
     .key {
       font-family: "Kanit", sans-serif;
       font-size: 1.25em;
-
+      text-transform: uppercase;
       border: 0;
-
       width: 40px;
       height: 58px;
       border-radius: 4px;
@@ -25,16 +24,16 @@ main-keyboard {
       user-select: none;
       background-color: #818384;
       color: #ffffff;
+    }
+
+    .oneAndHalf {
+      width: 60px;
+      font-size: 12px;
+      font-weight: 600;
 
       svg {
         color: #ffffff;
       }
-    }
-
-    .unique {
-      width: 60px;
-      font-size: 12px;
-      font-weight: 600;
     }
   }
 }
