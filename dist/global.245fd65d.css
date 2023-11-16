@@ -9,22 +9,36 @@ main-header {
 }
 
 main-tiles {
-  display: grid;
-  height: 371px;
-  width: 300px;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
   margin: 30px auto;
 }
-main-tiles .tile {
+main-tiles .row {
   display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+main-tiles .row .tile {
+  display: flex;
+  width: 55px;
+  height: 55px;
   align-items: center;
   justify-content: center;
   background-color: #000000;
+  text-transform: uppercase;
   font-size: 36px;
   font-family: "Kanit", sans-serif;
   color: #ffffff;
+}
+main-tiles .row [data-state=absent] {
+  background-color: #3a3a3c;
+}
+main-tiles .row [data-state=present] {
+  background-color: #b59f3b;
+}
+main-tiles .row [data-state=correct] {
+  background-color: #538d4e;
 }
 
 main-keyboard {
@@ -61,6 +75,15 @@ main-keyboard .row .oneAndHalf {
 }
 main-keyboard .row .oneAndHalf svg {
   color: #ffffff;
+}
+main-keyboard .row [data-state=absent] {
+  background-color: #3a3a3c;
+}
+main-keyboard .row [data-state=present] {
+  background-color: #b59f3b;
+}
+main-keyboard .row [data-state=correct] {
+  background-color: #538d4e;
 }
 
 /*# sourceMappingURL=/global.245fd65d.css.map */

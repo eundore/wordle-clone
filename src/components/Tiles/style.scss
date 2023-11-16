@@ -1,19 +1,37 @@
 main-tiles {
-  display: grid;
-  height: 371px;
-  width: 300px;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  gap: 8px;
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
   margin: 30px auto;
 
-  .tile {
+  .row {
     display: flex;
-    align-items: center;
     justify-content: center;
-    background-color: #000000;
-    font-size: 36px;
-    font-family: "Kanit", sans-serif;
-    color: #ffffff;
+    gap: 5px;
+
+    .tile {
+      display: flex;
+      width: 55px;
+      height: 55px;
+      align-items: center;
+      justify-content: center;
+      background-color: #000000;
+      text-transform: uppercase;
+      font-size: 36px;
+      font-family: "Kanit", sans-serif;
+      color: #ffffff;
+    }
+
+    [data-state="absent"] {
+      background-color: #3a3a3c;
+    }
+
+    [data-state="present"] {
+      background-color: #b59f3b;
+    }
+
+    [data-state="correct"] {
+      background-color: #538d4e;
+    }
   }
 }

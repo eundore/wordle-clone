@@ -35,5 +35,17 @@ main-keyboard {
         color: #ffffff;
       }
     }
+
+    [data-state="absent"] {
+      background-color: #3a3a3c;
+    }
+
+    [data-state="present"] {
+      background-color: #b59f3b;
+    }
+
+    [data-state="correct"] {
+      background-color: #538d4e;
+    }
   }
 }
