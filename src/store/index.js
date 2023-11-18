@@ -4,8 +4,6 @@ class Store {
   constructor() {
     const randomIndex = Math.floor(Math.random() * WORDS.length);
 
-    console.log(WORDS[randomIndex]);
-
     this.state = {
       storage: {
         index: 0,
