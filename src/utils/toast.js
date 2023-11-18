@@ -8,5 +8,5 @@ export default function createToast(message, timer = 1500) {
 
   setTimeout(function () {
     toast.removeChild(messageContainer);
-  }, 1500);
+  }, timer);
 }

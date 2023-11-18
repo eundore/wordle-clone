@@ -195,10 +195,12 @@ var Store = /*#__PURE__*/function () {
   function Store() {
     _classCallCheck(this, Store);
     var randomIndex = Math.floor(Math.random() * _constants.WORDS.length);
+    console.log(_constants.WORDS[randomIndex]);
     this.state = {
       storage: {
         index: 0,
-        answer: _constants.WORDS[randomIndex]
+        answer: _constants.WORDS[randomIndex],
+        result_emoji: []
       }
     };
     this.listeners = {};
@@ -347,7 +349,7 @@ function createToast(message) {
   toast.appendChild(messageContainer);
   setTimeout(function () {
     toast.removeChild(messageContainer);
-  }, 1500);
+  }, timer);
 }
 },{}],"src/components/Keyboard/index.js":[function(require,module,exports) {
 "use strict";
@@ -403,6 +405,7 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       this.word = "";
       this.index = 0;
       this.answer = "";
+      this.result_emoji = [];
       this.isEnd = false;
       this.isLast = false;
       this.isNotEnough = true;
@@ -443,10 +446,12 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       var _store$getState = _store.default.getState("storage"),
         word = _store$getState.word,
         index = _store$getState.index,
-        answer = _store$getState.answer;
+        answer = _store$getState.answer,
+        result_emoji = _store$getState.result_emoji;
       this.word = word;
       this.index = index;
       this.answer = answer;
+      this.result_emoji = _toConsumableArray(result_emoji);
       this.isEnd = index >= _constants.ROW_LENGTH;
       this.isLast = index === _constants.ROW_LENGTH - 1;
       this.isNotEnough = word.length < _constants.COLUMN_LENGTH;
@@ -536,14 +541,18 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       }
       var word = _toConsumableArray(this.word);
       var answer = _toConsumableArray(this.answer);
+      var result_emoji = _toConsumableArray(this.result_emoji);
       var result = [];
       for (var i = 0; i < _constants.COLUMN_LENGTH; i++) {
         if (word[i] === answer[i]) {
           result.push("correct");
+          result_emoji.push("🟦");
         } else if (answer.includes(word[i])) {
           result.push("present");
+          result_emoji.push("🟨");
         } else {
           result.push("absent");
+          result_emoji.push("⬛");
         }
       }
       var row = document.getElementById("row-".concat(this.index));
@@ -565,7 +574,7 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
         }
       });
       if (this.word === this.answer) {
-        (0, _toast.default)("Congratulations!");
+        (0, _toast.default)("Congratulations!", 5000);
         this.isCorrect = true;
       } else if (isLast) {
         (0, _toast.default)(this.answer, 5000);
@@ -573,7 +582,9 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
       _store.default.setState("storage", {
         index: this.index + 1,
         word: "",
-        key: null
+        key: null,
+        result_emoji: result_emoji,
+        isCorrect: this.isCorrect
       });
     }
   }, {
@@ -598,7 +609,112 @@ var Keyboard = /*#__PURE__*/function (_HTMLElement) {
 function defineKeyboard() {
   customElements.define("main-keyboard", Keyboard);
 }
-},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js","../../utils/toast":"src/utils/toast.js"}],"src/pages/main/index.js":[function(require,module,exports) {
+},{"../../store":"src/store/index.js","../../constants":"src/constants/index.js","../../utils/toast":"src/utils/toast.js"}],"src/components/Popup/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = definePopup;
+var _constants = require("../../constants");
+var _store = _interopRequireDefault(require("../../store"));
+var _toast = _interopRequireDefault(require("../../utils/toast"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct.bind(); } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeFunction(fn) { try { return Function.toString.call(fn).indexOf("[native code]") !== -1; } catch (e) { return typeof fn === "function"; } }
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+var Popup = /*#__PURE__*/function (_HTMLElement) {
+  _inherits(Popup, _HTMLElement);
+  var _super = _createSuper(Popup);
+  function Popup() {
+    var _this;
+    _classCallCheck(this, Popup);
+    _this = _super.call(this);
+    _this.result = "";
+    _store.default.subscribe("storage", function () {
+      _this.render();
+    });
+    return _this;
+  }
+  _createClass(Popup, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+      var _store$getState = _store.default.getState("storage"),
+        isCorrect = _store$getState.isCorrect,
+        index = _store$getState.index,
+        result_emoji = _store$getState.result_emoji;
+      if (index < _constants.ROW_LENGTH && !isCorrect) {
+        return;
+      }
+      this.style.opacity = 100;
+      this.style.zIndex = 1000;
+      var today = new Date();
+      var currentTime = today.toLocaleString();
+      var attempts = index;
+      var background = document.createElement("div");
+      background.classList.add("background");
+      var popup = document.createElement("div");
+      popup.classList.add("popup");
+      var content = document.createElement("span");
+      for (var i = 0; i < result_emoji.length; i++) {
+        if (i % _constants.COLUMN_LENGTH === 0) {
+          this.result += "<br />";
+        }
+        this.result += result_emoji[i];
+      }
+      content.innerHTML = "Wordle ".concat(currentTime, " ").concat(attempts, "/6 <br /><br /><br /> ").concat(this.result);
+      var shareBtn = document.createElement("button");
+      shareBtn.classList.add("share");
+      shareBtn.innerHTML = "Share";
+      shareBtn.addEventListener("click", function () {
+        window.navigator.clipboard.writeText(content.innerHTML.replaceAll("<br>", "\n")).then(function () {
+          (0, _toast.default)("Copied!");
+        });
+      });
+      var tryAgainBtn = document.createElement("button");
+      tryAgainBtn.classList.add("try-again");
+      tryAgainBtn.innerHTML = "Try Again";
+      tryAgainBtn.addEventListener("click", function () {
+        location.reload();
+      });
+      var btnContainer = document.createElement("div");
+      btnContainer.classList.add("btnContainer");
+      btnContainer.appendChild(shareBtn);
+      btnContainer.appendChild(tryAgainBtn);
+      var closeBtn = document.createElement("div");
+      closeBtn.classList.add("close");
+      closeBtn.innerHTML = "<svg height=\"20\" viewBox=\"0 0 24 24\" width=\"20\"\n     xmlns=\"http://www.w3.org/2000/svg\">\n    <line x1=\"1\" y1=\"22\" \n          x2=\"22\" y2=\"1\" \n          stroke=\"white\" \n          stroke-width=\"4\"/>\n    <line x1=\"1\" y1=\"1\" \n          x2=\"22\" y2=\"22\" \n          stroke=\"white\" \n          stroke-width=\"4\"/>\n</svg>";
+      closeBtn.addEventListener("click", function () {
+        _this2.style.opacity = 0;
+        _this2.style.zIndex = -1;
+      });
+      popup.appendChild(content);
+      popup.appendChild(btnContainer);
+      background.appendChild(popup);
+      background.appendChild(closeBtn);
+      this.appendChild(background);
+    }
+  }]);
+  return Popup;
+}( /*#__PURE__*/_wrapNativeSuper(HTMLElement));
+function definePopup() {
+  customElements.define("main-popup", Popup);
+}
+},{"../../constants":"src/constants/index.js","../../store":"src/store/index.js","../../utils/toast":"src/utils/toast.js"}],"src/pages/main/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -608,16 +724,18 @@ exports.default = onCreateMainPage;
 var _Header = _interopRequireDefault(require("../../components/Header"));
 var _Tiles = _interopRequireDefault(require("../../components/Tiles"));
 var _Keyboard = _interopRequireDefault(require("../../components/Keyboard"));
+var _Popup = _interopRequireDefault(require("../../components/Popup"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 function onCreateMainPage() {
-  return "<main-header></main-header>\n    <main-tiles></main-tiles>\n    <main-keyboard></main-keyboard>";
+  return "<main-header></main-header>\n    <main-tiles></main-tiles>\n    <main-keyboard></main-keyboard>\n    <main-popup></main-popup>";
 }
 addEventListener("DOMContentLoaded", function () {
   (0, _Header.default)();
   (0, _Tiles.default)();
   (0, _Keyboard.default)();
+  (0, _Popup.default)();
 });
-},{"../../components/Header":"src/components/Header/index.js","../../components/Tiles":"src/components/Tiles/index.js","../../components/Keyboard":"src/components/Keyboard/index.js"}],"src/index.js":[function(require,module,exports) {
+},{"../../components/Header":"src/components/Header/index.js","../../components/Tiles":"src/components/Tiles/index.js","../../components/Keyboard":"src/components/Keyboard/index.js","../../components/Popup":"src/components/Popup/index.js"}],"src/index.js":[function(require,module,exports) {
 "use strict";
 
 var _main = _interopRequireDefault(require("./pages/main"));
@@ -625,9 +743,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var app = document.getElementById("app");
 var onCreateComponent = function onCreateComponent(element) {
   app.insertAdjacentHTML("beforeend", element);
-  //event && event();
 };
-
 addEventListener("DOMContentLoaded", function () {
   onCreateComponent((0, _main.default)());
 });
@@ -656,7 +772,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54063" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59637" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

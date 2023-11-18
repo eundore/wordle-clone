@@ -16,6 +16,7 @@ class Keyboard extends HTMLElement {
     this.word = "";
     this.index = 0;
     this.answer = "";
+    this.result_emoji = [];
 
     this.isEnd = false;
     this.isLast = false;
@@ -47,11 +48,12 @@ class Keyboard extends HTMLElement {
   }
 
   updateState() {
-    const { word, index, answer } = store.getState("storage");
+    const { word, index, answer, result_emoji } = store.getState("storage");
 
     this.word = word;
     this.index = index;
     this.answer = answer;
+    this.result_emoji = [...result_emoji];
 
     this.isEnd = index >= ROW_LENGTH;
     this.isLast = index === ROW_LENGTH - 1;
@@ -123,15 +125,20 @@ class Keyboard extends HTMLElement {
 
     const word = [...this.word];
     const answer = [...this.answer];
+    const result_emoji = [...this.result_emoji];
+
     const result = [];
 
     for (let i = 0; i < COLUMN_LENGTH; i++) {
       if (word[i] === answer[i]) {
         result.push("correct");
+        result_emoji.push("🟦");
       } else if (answer.includes(word[i])) {
         result.push("present");
+        result_emoji.push("🟨");
       } else {
         result.push("absent");
+        result_emoji.push("⬛");
       }
     }
 
@@ -159,7 +166,7 @@ class Keyboard extends HTMLElement {
     });
 
     if (this.word === this.answer) {
-      createToast("Congratulations!");
+      createToast("Congratulations!", 5000);
       this.isCorrect = true;
     } else if (isLast) {
       createToast(this.answer, 5000);
@@ -169,6 +176,8 @@ class Keyboard extends HTMLElement {
       index: this.index + 1,
       word: "",
       key: null,
+      result_emoji,
+      isCorrect: this.isCorrect,
     });
   }
 
