@@ -1,0 +1,51 @@
+main-keyboard {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  max-width: 484px;
+  margin: auto;
+
+  .row {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+
+    .key {
+      font-family: "Kanit", sans-serif;
+      font-size: 20px;
+      text-transform: uppercase;
+      border: 0;
+      width: 40px;
+      height: 58px;
+      border-radius: 4px;
+      cursor: pointer;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      background-color: #818384;
+      color: #ffffff;
+    }
+
+    .oneAndHalf {
+      width: 60px;
+      font-size: 12px;
+      font-weight: 600;
+
+      svg {
+        color: #ffffff;
+      }
+    }
+
+    [data-state="absent"] {
+      background-color: #3a3a3c;
+    }
+
+    [data-state="present"] {
+      background-color: #ebe563;
+    }
+
+    [data-state="correct"] {
+      background-color: #43c7f4;
+    }
+  }
+}
